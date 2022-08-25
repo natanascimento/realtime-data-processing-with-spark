@@ -1,10 +1,10 @@
 from confluent_kafka import Producer
-from app.core.config import KafkaSettings
+from app.core.config import KafkaProducerSettings
 
 
 class EventProducer:
 
-    def __init__(self, kafka_settings: KafkaSettings):
+    def __init__(self, kafka_settings: KafkaProducerSettings):
         self.__producer = Producer(**kafka_settings.conf)
 
     @staticmethod
@@ -14,7 +14,7 @@ class EventProducer:
         else:
             print(f'Message delivered to {msg.topic()} [{msg.partition()}] @ {msg.offset()}\n')
 
-    def produce(self, topic: str, message: dict) -> None:
+    def start(self, topic: str, message: dict) -> None:
         try:
             self.__producer.produce(topic, str(message), callback=self.__delivery_callback)
             self.__producer.poll(0)
