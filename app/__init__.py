@@ -1,34 +1,19 @@
-from confluent_kafka import Producer
-import sys
-
-conf = {'bootstrap.servers': 'localhost:9092'}
+from app.core.config import KafkaSettings
+from app.events.producer import EventProducer
 
 topic = 'finance.broker.transactions.customers'
 
-
-def delivery_callback(err, msg):
-    if err:
-        sys.stderr.write('%% Message failed delivery: %s\n' % err)
-    else:
-        sys.stderr.write('%% Message delivered to %s [%d] @ %d\n' %
-                         (msg.topic(), msg.partition(), msg.offset()))
+message = {"customer_first_name": "Natan",
+           "customer_last_name": "Nascimento",
+           "customer_age": "23"}
 
 
 def produce():
-    print("PRODUCING DATA ...")
+    for i in range(10):
+        EventProducer(kafka_settings=KafkaSettings())\
+            .produce(topic=topic,
+                     message=message)
 
-    p = Producer(**conf)
-
-    try:
-        # Produce line (without newline)
-        p.produce(topic, "teste", callback=delivery_callback)
-
-    except BufferError:
-        sys.stderr.write('%% Local producer queue is full (%d messages awaiting delivery): try again\n' %
-                         len(p))
-
-    p.poll(0)
-    p.flush()
 
 def consume():
     print("CONSUMING DATA ...")
