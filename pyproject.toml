@@ -15,6 +15,7 @@ consume = "app:consume"
 python = "^3.8"
 confluent-kafka = "^1.9.2"
 python-dotenv = "^0.20.0"
+Faker = "^14.1.0"
 
 [tool.poetry.dev-dependencies]
 
