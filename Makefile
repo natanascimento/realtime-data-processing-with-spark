@@ -46,7 +46,7 @@ produce:
 	poetry run produce
 
 consume:
-	poetry run produce
+	poetry run consume
 
 install:
 	pip install poetry && poetry install
