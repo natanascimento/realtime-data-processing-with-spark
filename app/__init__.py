@@ -1,19 +1,19 @@
-from app.core.config import KafkaSettings
+from app.core.config import KafkaProducerSettings, KafkaConsumerSettings
 from app.events.producer import EventProducer
+from app.events.consumer import EventConsumer
+from app.events.data import Customer
+
 
 topic = 'finance.broker.transactions.customers'
 
-message = {"customer_first_name": "Natan",
-           "customer_last_name": "Nascimento",
-           "customer_age": "23"}
-
 
 def produce():
-    for i in range(10):
-        EventProducer(kafka_settings=KafkaSettings())\
-            .produce(topic=topic,
-                     message=message)
+    for event in range(100):
+        EventProducer(kafka_settings=KafkaProducerSettings()) \
+            .start(topic=topic,
+                   message=Customer().get)
 
 
 def consume():
-    print("CONSUMING DATA ...")
+    EventConsumer(kafka_settings=KafkaConsumerSettings(consumer_group="fake_consumer_group"))\
+        .start(topic=topic)

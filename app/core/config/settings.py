@@ -22,6 +22,22 @@ class KafkaSettings(Settings):
     def broker(self) -> str:
         return f"{self.KAFKA_BROKER_IP}:{self.KAFKA_BROKER_PORT}"
 
+
+class KafkaProducerSettings(KafkaSettings):
+
     @property
     def conf(self) -> dict:
         return {"bootstrap.servers": self.broker}
+
+
+class KafkaConsumerSettings(KafkaSettings):
+
+    def __init__(self, consumer_group: str):
+        self.__consumer_group = consumer_group
+
+    @property
+    def conf(self) -> dict:
+        return {"bootstrap.servers": self.broker,
+                "group.id": self.__consumer_group,
+                "auto.offset.reset": "earliest",
+                "session.timeout.ms": 6000}

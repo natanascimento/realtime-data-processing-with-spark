@@ -1,3 +1,3 @@
-from app.core.config.settings import Settings, KafkaSettings
+from app.core.config.settings import Settings, KafkaProducerSettings, KafkaConsumerSettings
 
 settings = Settings()
