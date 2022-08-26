@@ -3,7 +3,7 @@ services:
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
     networks:
-      - broker-kafka
+      - data-streaming
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
@@ -11,7 +11,7 @@ services:
   kafka:
     image: confluentinc/cp-kafka:latest
     networks:
-      - broker-kafka
+      - data-streaming
     depends_on:
       - zookeeper
     ports:
@@ -27,7 +27,7 @@ services:
   kafdrop:
     image: obsidiandynamics/kafdrop:latest
     networks:
-      - broker-kafka
+      - data-streaming
     depends_on:
       - kafka
     ports:
@@ -38,7 +38,7 @@ services:
   spark:
     image: jupyter/pyspark-notebook:spark-3.1.2
     networks:
-      - broker-kafka
+      - data-streaming
     container_name: spark
     hostname: spark
     user: root
@@ -47,7 +47,7 @@ services:
       - SPARK_LOCAL_HOSTNAME=localhost
       - NB_GID=100
       - GRANT_SUDO=yes
-      - PYSPARK_SUBMIT_ARGS=--packages io.delta:delta-core_2.12:1.0.0,org.apache.spark:spark-sql-kafka-0-10_2.12:3.1.2, org.postgresql:postgresql:42.1.1 pyspark-shell
+      - PYSPARK_SUBMIT_ARGS=--packages io.delta:delta-core_2.12:1.0.0,org.apache.spark:spark-sql-kafka-0-10_2.12:3.1.2,org.postgresql:postgresql:42.5.0 pyspark-shell
     env_file:
       - .env
     ports:
@@ -58,12 +58,16 @@ services:
 
   metabase:
     image: metabase/metabase
+    networks:
+      - data-streaming
     hostname: metabase
     ports:
       - "3000:3000"
 
   postgres:
       image: postgres
+      networks:
+        - data-streaming
       environment:
           - POSTGRES_USER=pyne
           - POSTGRES_PASSWORD=pyne
@@ -73,6 +77,8 @@ services:
 
   pgadmin:
       image: dpage/pgadmin4
+      networks:
+        - data-streaming
       container_name: pgadmin4
       hostname: pgadmin4
       environment:
@@ -84,5 +90,5 @@ services:
           - "18080:80"
 
 networks:
-  broker-kafka:
+  data-streaming:
     driver: bridge
