@@ -35,7 +35,7 @@ setup:
 setup-info:
 	@echo "View infrastructure status"
 	@echo "----------"
-	docker ps -a | grep -E 'kafka|zookeeper|kafdrop'
+	docker ps -a | grep -E 'kafka|zookeeper|kafdrop|spark'
 
 setup-down:
 	@echo "Removing infrastructure ..."
