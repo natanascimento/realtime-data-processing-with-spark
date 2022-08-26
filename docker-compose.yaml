@@ -3,7 +3,7 @@ services:
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
     networks:
-      - broker-kafka
+      - data-streaming
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
@@ -11,11 +11,11 @@ services:
   kafka:
     image: confluentinc/cp-kafka:latest
     networks:
-      - broker-kafka
+      - data-streaming
     depends_on:
       - zookeeper
     ports:
-      - 9092:9092
+      - "9092:9092"
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
@@ -27,14 +27,68 @@ services:
   kafdrop:
     image: obsidiandynamics/kafdrop:latest
     networks:
-      - broker-kafka
+      - data-streaming
     depends_on:
       - kafka
     ports:
-      - 19000:9000
+      - "19000:9000"
     environment:
       KAFKA_BROKERCONNECT: kafka:29092
 
+  spark:
+    image: jupyter/pyspark-notebook:spark-3.1.2
+    networks:
+      - data-streaming
+    container_name: spark
+    hostname: spark
+    user: root
+    environment:
+      - JUPYTER_ENABLE_LAB=yes
+      - SPARK_LOCAL_HOSTNAME=localhost
+      - NB_GID=100
+      - GRANT_SUDO=yes
+      - PYSPARK_SUBMIT_ARGS=--packages io.delta:delta-core_2.12:1.0.0,org.apache.spark:spark-sql-kafka-0-10_2.12:3.1.2,org.postgresql:postgresql:42.5.0 pyspark-shell
+    env_file:
+      - .env
+    ports:
+      - "8888:8888"
+      - "4040-4080:4040-4080"
+    volumes:
+      - ./notebooks:/home/jovyan/notebooks
+
+  metabase:
+    image: metabase/metabase
+    networks:
+      - data-streaming
+    hostname: metabase
+    ports:
+      - "3000:3000"
+
+  postgres:
+      image: postgres
+      networks:
+        - data-streaming
+      environment:
+          - POSTGRES_USER=pyne
+          - POSTGRES_PASSWORD=pyne
+          - POSTGRES_DB=pyne
+      ports:
+          - "5432:5432"
+
+  pgadmin:
+      image: dpage/pgadmin4
+      networks:
+        - data-streaming
+      container_name: pgadmin4
+      hostname: pgadmin4
+      environment:
+          - PGADMIN_DEFAULT_EMAIL=admin@pyne.com
+          - PGADMIN_DEFAULT_PASSWORD=pyne
+      depends_on:
+          - postgres
+      ports:
+          - "18080:80"
+
 networks:
-  broker-kafka:
+  data-streaming:
     driver: bridge

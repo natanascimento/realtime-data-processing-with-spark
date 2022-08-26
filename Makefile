@@ -1,3 +1,6 @@
+SHELL := /bin/bash
+CONTAINER_ID := $(shell docker ps -qf "name=spark")
+
 .PHONY: help setup setup-info setup-down produce install uninstall reinstall
 .DEFAULT: help
 
@@ -30,17 +33,20 @@ help:
 setup:
 	@echo "Setting up the project ..."
 	@echo "----------"
-	docker-compose up -d
+	docker compose up -d
 
 setup-info:
 	@echo "View infrastructure status"
 	@echo "----------"
-	docker ps -a | grep -E 'kafka|zookeeper|kafdrop'
+	docker ps -a | grep -E 'kafka|zookeeper|kafdrop|spark'
 
 setup-down:
 	@echo "Removing infrastructure ..."
 	@echo "----------"
-	docker-compose down
+	docker compose down
+
+spark-logs:
+	docker logs -f ${CONTAINER_ID}
 
 produce:
 	poetry run produce
